@@ -99,7 +99,7 @@ http://localhost:8080
 Test API:
 
 ```
-GET http://localhost:8080/products
+GET http://localhost:8080/api/products
 ```
 
 ---
@@ -161,20 +161,14 @@ docker-compose up --build
 Access:
 
 * Frontend → http://localhost:3000
-* Backend → http://localhost:8080/products
+* Backend → http://localhost:8080/api/products
 
 ---
 
 # Notes
 
 * Followed preferred stack: React + Spring Boot + PostgreSQL
-* Used simple REST APIs (`GET /products`, `POST /products`)
-* Added:
-
-  * Backend validation (`@NotBlank`)
-  * Global exception handling
-  * Frontend error handling
-  * Basic accessibility (ARIA roles, labels)
+* Used simple REST APIs (`GET /api/products`, `POST /api/product`)
 * Kept schema minimal as per requirement (only `id` and `name`)
 * Docker setup included for easy evaluation
 ---
