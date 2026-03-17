@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    container_name: products-db
+    restart: always
+    environment:
+      POSTGRES_DB: products_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abc@123
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    build:
+      context: ./products-backend
+    container_name: products-backend
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/products_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: abc@123
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./products-ui
+    container_name: products-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
