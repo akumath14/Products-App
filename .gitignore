@@ -11,3 +11,6 @@ backend/target
 
 # Env
 .env
+
+.idea/
+.vscode/

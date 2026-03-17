@@ -1,25 +1,20 @@
-# Build stage
 FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# Copy only pom.xml first (better caching)
-COPY pom.xml .
-RUN mvn dependency:go-offline
+# Copy the Maven descriptor first so dependency resolution can be cached.
+COPY pom.xml ./
+RUN mvn -B dependency:go-offline
 
-# Copy source code
 COPY src ./src
+RUN mvn -B clean package -DskipTests
 
-# Build jar
-RUN mvn clean package -DskipTests
-
-# Run stage
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar /app/app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
