@@ -80,7 +80,7 @@ spring.datasource.password=abc@123
 Navigate to backend folder:
 
 ```bash
-cd backend
+cd products-backend
 ```
 
 Build and run:
@@ -109,7 +109,7 @@ GET http://localhost:8080/products
 Navigate to frontend folder:
 
 ```bash
-cd frontend
+cd products-ui
 ```
 
 Install dependencies:
