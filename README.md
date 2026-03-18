@@ -1,178 +1,113 @@
 # Products App
 
-A minimal full-stack application to create and list products.
+A minimal full-stack application for creating and listing products.
 
-**Tech Stack**
+## Stack
 
-* Frontend: React
-* Backend: Spring Boot
-* Database: PostgreSQL
-* DevOps: Docker (optional but recommended)
+- Frontend: React
+- Backend: Spring Boot
+- Database: PostgreSQL
+- Container runtime: Docker Compose
 
----
+## Simplified Launch
 
-# Prerequisites
+The app is designed to run through Docker Compose.
 
-Make sure you have the following installed:
+Container topology:
 
-* Node.js (v18+ recommended)
-* npm (comes with Node)
-* Java JDK (17 recommended)
-* Maven (or use `./mvnw`)
-* PostgreSQL (v14+)
+- `frontend` is exposed to the host at `http://localhost:3000`
+- `backend` is internal-only
+- `db` is internal-only
 
-**OR (Recommended):**
+Browser traffic flows like this:
 
-* Docker
-* Docker Compose
+`browser -> frontend -> backend -> db`
 
----
+The frontend proxies `/api/*` requests to the backend, so you do not need to expose the backend or database directly to the host.
 
-# Database Setup
+## Prerequisites
 
-## Option 1 — Using Docker (Recommended)
+- Docker Desktop
+- Git
 
-Run:
+## Quick Start
 
-```bash
-docker-compose up -d db
-```
-
-This will:
-
-* Start PostgreSQL on port `5432`
-* Create database `products_db`
-* Automatically create the `products` table
-
----
-
-## Option 2 — Manual Setup
-
-### Step 1: Create Database
-
-```sql
-CREATE DATABASE products_db;
-```
-
-### Step 2: Create Table
-
-```sql
-CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
-```
-
-### Step 3: Update Backend Config
-
-Update `application.properties`:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/products_db
-spring.datasource.username=postgres
-spring.datasource.password=abc@123
-```
-
----
-
-# Start Backend
-
-Navigate to backend folder:
+From the repository root, run:
 
 ```bash
-cd products-backend
+./scripts/launch_changed.sh
 ```
 
-Build and run:
+This script:
 
-```bash
-mvn clean package
-mvn spring-boot:run
-```
+- detects local changes in `products-backend/` and `products-ui/`
+- rebuilds only the images for the subsystems that changed
+- starts the full stack with `docker compose up`
 
-Backend will start at:
+Then open:
 
-```
-http://localhost:8080
-```
-
-Test API:
-
-```
-GET http://localhost:8080/api/products
-```
-
----
-
-# Start Frontend
-
-Navigate to frontend folder:
-
-```bash
-cd products-ui
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start app:
-
-```bash
-npm start
-```
-
-Frontend will run at:
-
-```
+```text
 http://localhost:3000
 ```
 
----
+## First Launch
 
-# 🔍 Verify
+On the first run, Docker will build the backend and frontend images, so startup will take longer.
 
-1. Open:
-   http://localhost:3000
+Subsequent launches are faster because unchanged services reuse existing images.
 
-2. In the input field, create a product:
+## Verification
 
-   ```
-   P1
-   ```
+Open the UI:
 
-3. Click **Add**
-
-4. Confirm:
-
-   * Product appears in the list
-   * Page refresh still shows the product
-
----
-
-# Run Entire App with Docker (Optional)
-
-```bash
-docker-compose up --build
+```text
+http://localhost:3000
 ```
 
-Access:
+Or test the proxied API through the frontend:
 
-* Frontend → http://localhost:3000
-* Backend → http://localhost:8080/api/products
+```bash
+curl http://localhost:3000/api/products
+curl -X POST http://localhost:3000/api/product \
+  -H "Content-Type: application/json" \
+  -d '{"name":"P1"}'
+curl http://localhost:3000/api/products
+```
 
----
+## Useful Commands
 
-# Notes
+Launch everything and rebuild changed app images only:
 
-* Followed preferred stack: React + Spring Boot + PostgreSQL
-* Used simple REST APIs (`GET /api/products`, `POST /api/product`)
-* Kept schema minimal as per requirement (only `id` and `name`)
-* Docker setup included for easy evaluation
----
+```bash
+./scripts/launch_changed.sh
+```
 
-# Author
+Force a full rebuild of all services:
 
-Submitted as part of a full-stack coding exercise.
+```bash
+docker compose up --build -d
+```
+
+Stop the stack:
+
+```bash
+docker compose down
+```
+
+See running containers:
+
+```bash
+docker compose ps
+```
+
+View logs:
+
+```bash
+docker compose logs -f
+```
+
+## Notes
+
+- The database initialization script is bind-mounted from [database/init.sql](/Users/yashrahmed/Documents/extern-github-repos/Products-App/database/init.sql).
+- Backend and frontend application code are built into Docker images; source changes are not bind-mounted into the containers.
+- If port `3000` is already in use, the frontend container will fail to bind until that process is stopped or the Compose port mapping is changed.
